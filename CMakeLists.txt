@@ -6,8 +6,11 @@ cmake_minimum_required(VERSION 2.8.8)
 
 set(DL_LIB "gie" CACHE FILEPATH "gie or caffe")
 
-set(PROJECTNAME caffeVSgie_feat_extraction)
+set(PROJECTNAME caffeVSgie_feat_extraction_${DL_LIB})
 project(${PROJECTNAME})
+
+message("${DL_LIB}")
+message("${PROJECTNAME}")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 

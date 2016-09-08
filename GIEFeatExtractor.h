@@ -13,7 +13,8 @@
 
 // GIE
 //#include "Infer.h"
-#include "caffeParser.h"
+//#include "caffeParser.h"
+#include "NvCaffeParser.h"
 #include "cudaUtility.h"
 
 using namespace cv;

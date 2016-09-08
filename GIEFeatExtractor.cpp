@@ -40,9 +40,10 @@ bool GIEFeatExtractor::caffeToGIEModel( const std::string& deployFile,				// nam
 	nvinfer1::INetworkDefinition* network = builder->createNetwork();
 
 	// parse the caffe model to populate the network, then set the outputs
-	nvcaffeparser1::CaffeParser* parser = new nvcaffeparser1::CaffeParser;
+//	nvcaffeparser1::CaffeParser* parser = new nvcaffeparser1::CaffeParser;
+    nvcaffeparser1::ICaffeParser* parser = nvcaffeparser1::createCaffeParser();
 
-	const bool useFp16 = builder->plaformHasFastFp16();
+    const bool useFp16 = builder->platformHasFastFp16();
 	std::cout << "Platform FP16 support: " << useFp16 << std::endl;
 	std::cout << "Loading: " << deployFile << ", " << modelFile << std::endl;
 	
@@ -86,7 +87,7 @@ bool GIEFeatExtractor::caffeToGIEModel( const std::string& deployFile,				// nam
 
 	// we don't need the network any more, and we can destroy the parser
 	network->destroy();
-	delete parser;
+    parser->destroy();
 
 	// serialize the engine, then close everything down
 	engine->serialize(gieModelStream);
