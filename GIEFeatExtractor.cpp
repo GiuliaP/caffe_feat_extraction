@@ -36,13 +36,14 @@ bool GIEFeatExtractor::caffeToGIEModel( const std::string& deployFile,				// nam
 					                    std::ostream& gieModelStream)				// output stream for the GIE model
 {
 	// create API root class - must span the lifetime of the engine usage
-	nvinfer1::IBuilder* builder = createInferBuilder(gLogger);
-	nvinfer1::INetworkDefinition* network = builder->createNetwork();
+	builder = createInferBuilder(gLogger);
+	network = builder->createNetwork();
 
 	// parse the caffe model to populate the network, then set the outputs
-	nvcaffeparser1::CaffeParser* parser = new nvcaffeparser1::CaffeParser;
+	//nvcaffeparser1::CaffeParser* parser = new nvcaffeparser1::CaffeParser;
+	parser = nvcaffeparser1::createCaffeParser();
 
-	const bool useFp16 = builder->plaformHasFastFp16();
+        const bool useFp16 = builder->platformHasFastFp16();
 	std::cout << "Platform FP16 support: " << useFp16 << std::endl;
 	std::cout << "Loading: " << deployFile << ", " << modelFile << std::endl;
 	
@@ -76,7 +77,7 @@ bool GIEFeatExtractor::caffeToGIEModel( const std::string& deployFile,				// nam
 		builder->setHalf2Mode(true);
 
 	std::cout << "Building CUDA engine..." << std::endl;
-	nvinfer1::ICudaEngine* engine = builder->buildCudaEngine(*network);
+	engine = builder->buildCudaEngine(*network);
 	
 	if( !engine )
 	{
@@ -84,14 +85,10 @@ bool GIEFeatExtractor::caffeToGIEModel( const std::string& deployFile,				// nam
 		return false;
 	}
 
-	// we don't need the network any more, and we can destroy the parser
-	network->destroy();
-	delete parser;
+
 
 	// serialize the engine, then close everything down
 	engine->serialize(gieModelStream);
-	engine->destroy();
-	builder->destroy();
 	
 	return true;
 }
@@ -251,7 +248,7 @@ bool GIEFeatExtractor::init(string _caffemodel_file, string _binaryproto_meanfil
     // Mean image initialization
     if (binaryproto_meanfile!="")
     {
-	    nvcaffeparser1::IBinaryProtoBlob* meanBlob = nvcaffeparser1::CaffeParser::parseBinaryProto(binaryproto_meanfile.c_str());
+	    nvcaffeparser1::IBinaryProtoBlob* meanBlob = parser->parseBinaryProto(binaryproto_meanfile.c_str());
         resizeDims = meanBlob->getDimensions();
         const float *meanData = reinterpret_cast<const float*>(meanBlob->getData());  // expected to be float* (c,h,w)
         float *meanDataChangeable = (float *) malloc(resizeDims.w*resizeDims.h*resizeDims.c*resizeDims.n*sizeof(float));
@@ -274,6 +271,12 @@ bool GIEFeatExtractor::init(string _caffemodel_file, string _binaryproto_meanfil
         resizeDims.c = 3;
         resizeDims.n = 1;
     }
+
+        // we don't need the network any more, and we can destroy the parser
+        network->destroy();
+        parser->destroy();
+        engine->destroy();
+        builder->destroy();
 
 	return true;
 }
