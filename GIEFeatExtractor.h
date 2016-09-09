@@ -70,7 +70,11 @@ protected:
 	float*   mOutputCUDA;
 
     Logger  gLogger;
-    
+    nvcaffeparser1::ICaffeParser* parser;
+    nvinfer1::ICudaEngine* engine;
+    nvinfer1::IBuilder* builder;
+    nvinfer1::INetworkDefinition* network;
+
 public:
 
     string prototxt_file;
